@@ -14,6 +14,10 @@ const options = {
         url: 'http://localhost:3000/api',
         description: 'Servidor local',
       },
+      {
+        url: 'https://arremato-wallet-api-27b8277f775f.herokuapp.com/api',
+        description: 'Servidor Homolog',
+      },
     ],
   },
   apis: ['./src/routes/index.js'],
