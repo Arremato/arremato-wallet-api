@@ -5,7 +5,7 @@ This project is a simple API built using Express.js. It serves as a template for
 ## Project Structure
 
 ```
-Easy Wallet API
+Arremato Wallet API
 ├── src
 │   ├── app.js               # Entry point of the application
 │   ├── controllers          # Contains controller logic

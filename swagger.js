@@ -5,7 +5,7 @@ const options = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'Easy Wallet API',
+      title: 'Arremato Wallet API',
       version: '1.0.0',
       description: 'API para gerenciamento da carteira de imóveis',
     },
@@ -22,5 +22,5 @@ const options = {
 const swaggerSpec = swaggerJsdoc(options);
 
 export default function setupSwagger(app) {
-  app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+  app.use('/arremato-api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 }
