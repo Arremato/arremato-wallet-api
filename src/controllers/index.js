@@ -20,14 +20,21 @@ class IndexController {
 
       const { data, error } = await supabase
         .from('users')
-        .insert([{ name, email, password: hashedPassword }]);
+        .insert([{ name, email, password: hashedPassword }])
+        .select(); // Garante que os dados inseridos sejam retornados
 
       if (error) {
-        return res.status(500).json({ error: error.message });
+        console.error("Supabase Error:", error);
+        return res.status(400).json({ error: error.message });
+      }
+
+      if (!data || data.length === 0) {
+        return res.status(500).json({ error: 'Erro ao criar usuário. Nenhum dado retornado.' });
       }
 
       res.status(201).json({ message: 'Usuário criado com sucesso.', user: data[0] });
     } catch (error) {
+      console.error("Catch Error:", error);
       res.status(500).json({ error: error.message });
     }
   }
