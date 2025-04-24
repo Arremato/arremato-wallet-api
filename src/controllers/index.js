@@ -13,11 +13,23 @@ class IndexController {
 
   async createUser(req, res) {
     const { name, email, password } = req.body;
-    const { data, error } = await supabase.from('users').insert([{ name, email, password }]);
-    if (error) {
-      return res.status(500).json({ error: error.message });
+
+    try {
+      // Criptografar a senha antes de salvar no banco
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      const { data, error } = await supabase
+        .from('users')
+        .insert([{ name, email, password: hashedPassword }]);
+
+      if (error) {
+        return res.status(500).json({ error: error.message });
+      }
+
+      res.status(201).json({ message: 'Usuário criado com sucesso.', user: data[0] });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
     }
-    res.status(201).json(data);
   }
 
   async getProperties(req, res) {
@@ -154,7 +166,7 @@ class IndexController {
         console.log("DATA", data);
         console.log("ERROR", error);
 
-      if (error || !data) {
+      if (error !== null || !data) {
         return res.status(401).json({ message: 'Credenciais inválidas.' });
       }
 
