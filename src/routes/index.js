@@ -12,14 +12,16 @@ router.use((req, res, next) => {
   ];
 
   const isOpenRoute = openRoutes.some(
-    (route) => route.method === req.method && route.path === req.path
+    (route) =>
+      route.method === req.method &&
+      req.originalUrl.endsWith(route.path) 
   );
 
   if (isOpenRoute) {
-    return next();
+    return next(); 
   }
 
-  authenticateUser(req, res, next);
+  authenticateUser(req, res, next); 
 });
 
 /**
