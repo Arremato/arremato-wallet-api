@@ -151,8 +151,8 @@ class IndexController {
         .eq('email', email)
         .single();
 
-        console.log(data);
-        console.log(error);
+        console.log("DATA", data);
+        console.log("ERROR", error);
 
       if (error || !data) {
         return res.status(401).json({ message: 'Credenciais inválidas.' });
