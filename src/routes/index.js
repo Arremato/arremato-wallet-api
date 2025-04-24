@@ -65,7 +65,7 @@ router.put('/users', indexController.updateUser.bind(indexController));
 
 /**
  * @swagger
- * /login:
+ * /auth/login:
  *   post:
  *     summary: Realiza login de um usuário
  *     requestBody:
@@ -85,7 +85,7 @@ router.put('/users', indexController.updateUser.bind(indexController));
  *       401:
  *         description: Credenciais inválidas.
  */
-router.post('/login', indexController.login.bind(indexController));
+router.post('/auth/login', indexController.login.bind(indexController));
 
 /**
  * @swagger
