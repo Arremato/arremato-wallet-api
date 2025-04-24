@@ -1,20 +1,35 @@
-// import express from 'express';
+import express from 'express';
+import jwt from 'jsonwebtoken';
 
-// const validateRequest = (req, res, next) => {
-//     next();
-// };
+const validateRequest = (req, res, next) => {
+    next();
+};
 
-// const authenticateUser = (req, res, next) => {
-//     next();
-// };
+const authenticateUser = (req, res, next) => {
+    const authHeader = req.headers.authorization;
 
-// const logRequest = (req, res, next) => {
-//     console.log(`${req.method} ${req.url}`);
-//     next();
-// };
+    if (!authHeader) {
+        return res.status(401).json({ message: 'Token não fornecido.' });
+    }
 
-// module.exports = {
-//     validateRequest,
-//     authenticateUser,
-//     logRequest
-// };
+    const token = authHeader.split(' ')[1]; // O formato esperado é "Bearer <token>"
+
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        req.user = decoded; // Adiciona os dados do usuário ao objeto `req`
+        next();
+    } catch (error) {
+        return res.status(401).json({ message: 'Token inválido ou expirado.' });
+    }
+};
+
+const logRequest = (req, res, next) => {
+    console.log(`${req.method} ${req.url}`);
+    next();
+};
+
+module.exports = {
+    validateRequest,
+    authenticateUser,
+    logRequest
+};

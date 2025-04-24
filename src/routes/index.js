@@ -1,8 +1,26 @@
 import express from 'express';
 import IndexController from '../controllers/index.js';
+import { authenticateUser } from '../middlewares/index.js';
 
 const router = express.Router();
 const indexController = new IndexController();
+
+router.use((req, res, next) => {
+  const openRoutes = [
+    { method: 'POST', path: '/users' },
+    { method: 'POST', path: '/auth/login' },
+  ];
+
+  const isOpenRoute = openRoutes.some(
+    (route) => route.method === req.method && route.path === req.path
+  );
+
+  if (isOpenRoute) {
+    return next(); 
+  }
+
+  authenticateUser(req, res, next); 
+});
 
 /**
  * @swagger
