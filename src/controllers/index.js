@@ -171,6 +171,7 @@ class IndexController {
       }
 
       const isPasswordValid = await bcrypt.compare(password, data.password);
+      console.log("IS PASSWORD VALID", isPasswordValid);
       if (!isPasswordValid) {
         return res.status(401).json({ message: 'Credenciais inválidas.' });
       }
@@ -178,6 +179,8 @@ class IndexController {
       const token = jwt.sign({ id: data.id, email: data.email }, process.env.JWT_SECRET, {
         expiresIn: '1h',
       });
+
+      console.log("TOKEN", token);
 
       res.status(200).json({ token, user: { id: data.id, name: data.name, email: data.email } });
     } catch (error) {
