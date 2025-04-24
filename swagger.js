@@ -11,7 +11,11 @@ const swaggerDefinition = {
   servers: [
     {
       url: 'http://localhost:3000/api',
-      description: 'Servidor local',
+      description: 'Local server',
+    },
+    {
+      url: 'https://arremato-wallet-api-27b8277f775f.herokuapp.com/api',
+      description: 'Online server',
     },
   ],
   components: {

@@ -16,10 +16,10 @@ router.use((req, res, next) => {
   );
 
   if (isOpenRoute) {
-    return next(); 
+    return next();
   }
 
-  authenticateUser(req, res, next); 
+  authenticateUser(req, res, next);
 });
 
 /**
@@ -27,6 +27,8 @@ router.use((req, res, next) => {
  * /users:
  *   get:
  *     summary: Lista todos os usuários
+ *     security:
+ *       - BearerAuth: []
  *     responses:
  *       200:
  *         description: Lista de usuários.
@@ -62,6 +64,8 @@ router.post('/users', indexController.createUser.bind(indexController));
  * /users:
  *   put:
  *     summary: Atualiza informações de um usuário
+ *     security:
+ *       - BearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -110,6 +114,8 @@ router.post('/auth/login', indexController.login.bind(indexController));
  * /properties:
  *   get:
  *     summary: Lista todos os imóveis
+ *     security:
+ *       - BearerAuth: []
  *     responses:
  *       200:
  *         description: Lista de imóveis.
@@ -121,6 +127,8 @@ router.get('/properties', indexController.getProperties.bind(indexController));
  * /properties:
  *   post:
  *     summary: Cria um novo imóvel
+ *     security:
+ *       - BearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -155,6 +163,8 @@ router.post('/properties', indexController.createProperty.bind(indexController))
  * /processes:
  *   post:
  *     summary: Cria uma nova tarefa para um imóvel
+ *     security:
+ *       - BearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -188,6 +198,8 @@ router.post('/processes', indexController.createProcess.bind(indexController));
  * /transactions:
  *   post:
  *     summary: Registra uma nova transação financeira
+ *     security:
+ *       - BearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -224,6 +236,8 @@ router.post('/transactions', indexController.createTransaction.bind(indexControl
  * /financial-summary:
  *   get:
  *     summary: Obtém o resumo financeiro do usuário
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
  *       - in: query
  *         name: user_id
@@ -242,6 +256,8 @@ router.get('/financial-summary', indexController.getFinancialSummary.bind(indexC
  * /loans:
  *   post:
  *     summary: Registra um novo empréstimo
+ *     security:
+ *       - BearerAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -269,6 +285,8 @@ router.post('/loans', indexController.createLoan.bind(indexController));
  * /user-properties:
  *   get:
  *     summary: Lista os imóveis do usuário
+ *     security:
+ *       - BearerAuth: []
  *     parameters:
  *       - in: query
  *         name: user_id
