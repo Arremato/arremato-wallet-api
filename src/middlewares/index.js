@@ -1,11 +1,11 @@
 import express from 'express';
 import jwt from 'jsonwebtoken';
 
-const validateRequest = (req, res, next) => {
+export const validateRequest = (req, res, next) => {
     next();
 };
 
-const authenticateUser = (req, res, next) => {
+export const authenticateUser = (req, res, next) => {
     const authHeader = req.headers.authorization;
 
     if (!authHeader) {
@@ -23,13 +23,7 @@ const authenticateUser = (req, res, next) => {
     }
 };
 
-const logRequest = (req, res, next) => {
+export const logRequest = (req, res, next) => {
     console.log(`${req.method} ${req.url}`);
     next();
-};
-
-module.exports = {
-    validateRequest,
-    authenticateUser,
-    logRequest
 };
