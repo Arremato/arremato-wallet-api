@@ -166,14 +166,14 @@ class IndexController {
         console.log("DATA", data);
         console.log("ERROR", error);
 
-      if (error) {
+      if (error !== null) {
         return res.status(401).json({ message: 'Credenciais inválidas.' });
       }
 
       const isPasswordValid = await bcrypt.compare(password, data.password);
       console.log("IS PASSWORD VALID", isPasswordValid);
 
-      if (isPasswordValid === false) {
+      if (isPasswordValid !== true) {
         return res.status(401).json({ message: 'Credenciais inválidas.' });
       }
 
@@ -185,6 +185,7 @@ class IndexController {
 
       res.status(200).json({ token, user: { id: data.id, name: data.name, email: data.email } });
     } catch (error) {
+      console.log("ERROR LOGIN", error);
       res.status(500).json({ error: error.message });
     }
   }
