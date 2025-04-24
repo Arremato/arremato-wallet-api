@@ -1,4 +1,6 @@
 import supabase from '../services/supabaseClient.js';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
 
 class IndexController {
   async getUsers(req, res) {
@@ -108,6 +110,64 @@ class IndexController {
     }
 
     res.status(201).json(data);
+  }
+
+  async updateUser(req, res) {
+    const { name, email, password } = req.body;
+    const userId = req.user.id; // Supondo que o ID do usuário esteja no token JWT
+
+    try {
+      const updates = {};
+      if (name) updates.name = name;
+      if (email) updates.email = email;
+      if (password) updates.password = await bcrypt.hash(password, 10);
+
+      const { data, error } = await supabase
+        .from('users')
+        .update(updates)
+        .eq('id', userId);
+
+      if (error) {
+        return res.status(500).json({ error: error.message });
+      }
+
+      if (data.length === 0) {
+        return res.status(404).json({ message: 'Usuário não encontrado.' });
+      }
+
+      res.status(200).json({ message: 'Usuário atualizado com sucesso.', user: data[0] });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  async login(req, res) {
+    const { email, password } = req.body;
+
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('id, name, email, password')
+        .eq('email', email)
+        .single();
+
+      if (error || !data) {
+        return res.status(401).json({ message: 'Credenciais inválidas.' });
+      }
+
+      const isPasswordValid = await bcrypt.compare(password, data.password);
+      if (!isPasswordValid) {
+        return res.status(401).json({ message: 'Credenciais inválidas.' });
+      }
+
+      const token = jwt.sign({ id: data.id, email: data.email }, process.env.JWT_SECRET, {
+        expiresIn: '1h',
+      });
+
+      res.status(200).json({ token, user: { id: data.id, name: data.name, email: data.email } });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
   }
 }
 

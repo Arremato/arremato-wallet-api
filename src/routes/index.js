@@ -41,6 +41,54 @@ router.post('/users', indexController.createUser.bind(indexController));
 
 /**
  * @swagger
+ * /users:
+ *   put:
+ *     summary: Atualiza informações de um usuário
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Usuário atualizado com sucesso.
+ */
+router.put('/users', indexController.updateUser.bind(indexController));
+
+/**
+ * @swagger
+ * /login:
+ *   post:
+ *     summary: Realiza login de um usuário
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *               password:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Login realizado com sucesso.
+ *       401:
+ *         description: Credenciais inválidas.
+ */
+router.post('/login', indexController.login.bind(indexController));
+
+/**
+ * @swagger
  * /properties:
  *   get:
  *     summary: Lista todos os imóveis
