@@ -166,7 +166,7 @@ class IndexController {
         console.log("DATA", data);
         console.log("ERROR", error);
 
-      if (error !== null || !data) {
+      if (error !== null || data === null) {
         return res.status(401).json({ message: 'Credenciais inválidas.' });
       }
 
