@@ -126,9 +126,8 @@ class IndexController {
     const { property_id, type, date, amount, category, description, receipt, funding_source } = req.body;
 
     try {
-      const userId = req.user.id; // Obtém o ID do usuário autenticado do token JWT
+      const userId = req.user.id;
 
-      // Verifica se a propriedade pertence ao usuário autenticado
       const { data: property, error: propertyError } = await supabase
         .from('properties')
         .select('id')
@@ -144,7 +143,7 @@ class IndexController {
         .from('financial_transactions')
         .insert([{ property_id, type, date, amount, category, description, receipt, funding_source }]);
 
-      if (error) {
+      if (!data || data.length === 0) {
         return res.status(400).json({ error: error.message });
       }
 
@@ -156,7 +155,7 @@ class IndexController {
 
   async getFinancialSummary(req, res) {
     try {
-      const userId = req.user.id; // Obtém o ID do usuário autenticado do token JWT
+      const userId = req.user.id;
 
       const { data, error } = await supabase.rpc('get_financial_summary', { user_id: userId });
 
@@ -174,7 +173,7 @@ class IndexController {
     const { amount, outstanding_balance, due_date } = req.body;
 
     try {
-      const userId = req.user.id; // Obtém o ID do usuário autenticado do token JWT
+      const userId = req.user.id;
 
       const { data, error } = await supabase
         .from('loans')
@@ -244,6 +243,60 @@ class IndexController {
       });
 
       res.status(200).json({ token, user: { id: data.id, name: data.name, email: data.email } });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  async getExpenseTypes(req, res) {
+    try {
+      const { data, error } = await supabase.from('expense_types').select('*');
+
+      if (error) {
+        return res.status(500).json({ error: error.message });
+      }
+
+      res.status(200).json(data);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  async getTransactions(req, res) {
+    try {
+      const userId = req.user.id;
+
+      const { data: properties, error: propertiesError } = await supabase
+        .from('properties')
+        .select('id')
+        .eq('user_id', userId);
+
+      if (propertiesError) {
+        return res.status(500).json({ error: propertiesError.message });
+      }
+      const propertyIds = properties.map((property) => property.id);
+
+      const { data: transactions, error: transactionsError } = await supabase
+        .from('financial_transactions')
+        .select(`
+          id,
+          property_id,
+          type,
+          date,
+          amount,
+          category,
+          description,
+          receipt,
+          funding_source,
+          properties (name, location)  -- Inclui informações da propriedade relacionada
+        `)
+        .in('property_id', propertyIds);
+
+      if (transactionsError) {
+        return res.status(500).json({ error: transactionsError.message });
+      }
+
+      res.status(200).json(transactions);
     } catch (error) {
       res.status(500).json({ error: error.message });
     }

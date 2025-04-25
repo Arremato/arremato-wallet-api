@@ -24,6 +24,7 @@ router.use((req, res, next) => {
   authenticateUser(req, res, next); 
 });
 
+
 /**
  * @swagger
  * /users:
@@ -301,6 +302,30 @@ router.post('/loans', indexController.createLoan.bind(indexController));
  *         description: Lista de imóveis retornada com sucesso.
  */
 router.get('/user-properties', indexController.getUserProperties.bind(indexController));
+
+/**
+ * @swagger
+ * /expense-types:
+ *   get:
+ *     summary: Lista todos os tipos de despesas
+ *     responses:
+ *       200:
+ *         description: Lista de tipos de despesas.
+ */
+router.get('/expense-types', indexController.getExpenseTypes.bind(indexController));
+
+/**
+ * @swagger
+ * /transactions:
+ *   get:
+ *     summary: Lista todas as transações financeiras relacionadas ao usuário
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de transações financeiras.
+ */
+router.get('/transactions', indexController.getTransactions.bind(indexController));
 
 export function setRoutes(app) {
   app.use('/api', router);
