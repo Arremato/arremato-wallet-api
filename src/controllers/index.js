@@ -38,10 +38,17 @@ class IndexController {
 
   async getProperties(req, res) {
     try {
-      const { data, error } = await supabase.from('properties').select('*');
+      const userId = req.user.id;
+
+      const { data, error } = await supabase
+        .from('properties')
+        .select('*')
+        .eq('user_id', userId);
+
       if (error) {
         return res.status(500).json({ error: error.message });
       }
+
       res.status(200).json(data);
     } catch (error) {
       res.status(500).json({ error: error.message });
