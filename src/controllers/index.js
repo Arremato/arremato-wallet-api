@@ -4,136 +4,188 @@ import jwt from 'jsonwebtoken';
 
 class IndexController {
   async getUsers(req, res) {
-    const { data, error } = await supabase.from('users').select('*');
-    if (error) {
-      return res.status(500).json({ error: error.message });
+    try {
+      const { data, error } = await supabase.from('users').select('*');
+      if (error) {
+        return res.status(500).json({ error: error.message });
+      }
+      res.status(200).json(data);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
     }
-    res.status(200).json(data);
   }
 
   async createUser(req, res) {
     const { name, email, password } = req.body;
 
     try {
-      // Criptografar a senha antes de salvar no banco
       const hashedPassword = await bcrypt.hash(password, 10);
 
       const { data, error } = await supabase
         .from('users')
         .insert([{ name, email, password: hashedPassword }])
-        .select(); // Garante que os dados inseridos sejam retornados
+        .select();
 
       if (error) {
-        console.error("Supabase Error:", error);
         return res.status(400).json({ error: error.message });
-      }
-
-      if (!data || data.length === 0) {
-        return res.status(500).json({ error: 'Erro ao criar usuário. Nenhum dado retornado.' });
       }
 
       res.status(201).json({ message: 'Usuário criado com sucesso.', user: data[0] });
     } catch (error) {
-      console.error("Catch Error:", error);
       res.status(500).json({ error: error.message });
     }
   }
 
   async getProperties(req, res) {
-    const { data, error } = await supabase.from('properties').select('*');
-    if (error) {
-      return res.status(500).json({ error: error.message });
+    try {
+      const { data, error } = await supabase.from('properties').select('*');
+      if (error) {
+        return res.status(500).json({ error: error.message });
+      }
+      res.status(200).json(data);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
     }
-    res.status(200).json(data);
   }
 
   async getUserProperties(req, res) {
-    const { user_id } = req.query;
+    try {
+      const userId = req.user.id;
 
-    const { data, error } = await supabase
-      .from('properties')
-      .select('*')
-      .eq('user_id', user_id);
+      const { data, error } = await supabase
+        .from('properties')
+        .select('*')
+        .eq('user_id', userId);
 
-    if (error) {
-      return res.status(500).json({ error: error.message });
+      if (error) {
+        return res.status(500).json({ error: error.message });
+      }
+
+      res.status(200).json(data);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
     }
-
-    res.status(200).json(data);
   }
 
   async createProperty(req, res) {
-    const { user_id, name, location, valuation, payment_method, acquisition_date, purpose } = req.body;
+    const { name, location, valuation, payment_method, acquisition_date, purpose } = req.body;
 
-    const { data, error } = await supabase
-      .from('properties')
-      .insert([{ user_id, name, location, valuation, payment_method, acquisition_date, purpose }]);
+    try {
+      const userId = req.user.id;
+      console.log('User ID:', userId);
 
-    if (error) {
-      return res.status(500).json({ error: error.message });
+      const { data, error } = await supabase
+        .from('properties')
+        .insert([{ user_id: userId, name, location, valuation, payment_method, acquisition_date, purpose }])
+        .select();
+
+      console.log('Resposta do Supabase:', { data, error });
+
+      if (error) {
+        console.error('Supabase Error:', error);
+        return res.status(400).json({ error: error.message });
+      }
+
+      if (!data || data.length === 0) {
+        return res.status(500).json({ error: 'Erro ao criar propriedade. Nenhum dado retornado.' });
+      }
+
+      res.status(201).json({ message: 'Imóvel criado com sucesso.', property: data[0] });
+    } catch (error) {
+      console.error('Catch Error:', error);
+      res.status(500).json({ error: error.message });
     }
-
-    res.status(201).json(data);
   }
 
   async createProcess(req, res) {
     const { property_id, activity, status, progress, description, updated_by } = req.body;
 
-    const { data, error } = await supabase
-      .from('processes')
-      .insert([{ property_id, activity, status, progress, description, updated_by }]);
+    try {
+      const { data, error } = await supabase
+        .from('processes')
+        .insert([{ property_id, activity, status, progress, description, updated_by }]);
 
-    if (error) {
-      return res.status(500).json({ error: error.message });
+      if (error) {
+        return res.status(400).json({ error: error.message });
+      }
+
+      res.status(201).json({ message: 'Processo criado com sucesso.', process: data[0] });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
     }
-
-    res.status(201).json(data);
   }
 
   async createTransaction(req, res) {
     const { property_id, type, date, amount, category, description, receipt, funding_source } = req.body;
 
-    const { data, error } = await supabase
-      .from('financial_transactions')
-      .insert([{ property_id, type, date, amount, category, description, receipt, funding_source }]);
+    try {
+      const userId = req.user.id; // Obtém o ID do usuário autenticado do token JWT
 
-    if (error) {
-      return res.status(500).json({ error: error.message });
+      // Verifica se a propriedade pertence ao usuário autenticado
+      const { data: property, error: propertyError } = await supabase
+        .from('properties')
+        .select('id')
+        .eq('id', property_id)
+        .eq('user_id', userId)
+        .single();
+
+      if (propertyError || !property) {
+        return res.status(403).json({ error: 'Você não tem permissão para adicionar transações a esta propriedade.' });
+      }
+
+      const { data, error } = await supabase
+        .from('financial_transactions')
+        .insert([{ property_id, type, date, amount, category, description, receipt, funding_source }]);
+
+      if (error) {
+        return res.status(400).json({ error: error.message });
+      }
+
+      res.status(201).json({ message: 'Transação criada com sucesso.', transaction: data[0] });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
     }
-
-    res.status(201).json(data);
   }
 
   async getFinancialSummary(req, res) {
-    const { user_id } = req.query;
+    try {
+      const userId = req.user.id; // Obtém o ID do usuário autenticado do token JWT
 
-    const { data, error } = await supabase
-      .rpc('get_financial_summary', { user_id });
+      const { data, error } = await supabase.rpc('get_financial_summary', { user_id: userId });
 
-    if (error) {
-      return res.status(500).json({ error: error.message });
+      if (error) {
+        return res.status(500).json({ error: error.message });
+      }
+
+      res.status(200).json(data);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
     }
-
-    res.status(200).json(data);
   }
 
   async createLoan(req, res) {
-    const { user_id, amount, outstanding_balance, due_date } = req.body;
+    const { amount, outstanding_balance, due_date } = req.body;
 
-    const { data, error } = await supabase
-      .from('loans')
-      .insert([{ user_id, amount, outstanding_balance, due_date }]);
+    try {
+      const userId = req.user.id; // Obtém o ID do usuário autenticado do token JWT
 
-    if (error) {
-      return res.status(500).json({ error: error.message });
+      const { data, error } = await supabase
+        .from('loans')
+        .insert([{ user_id: userId, amount, outstanding_balance, due_date }]);
+
+      if (error) {
+        return res.status(400).json({ error: error.message });
+      }
+
+      res.status(201).json({ message: 'Empréstimo criado com sucesso.', loan: data[0] });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
     }
-
-    res.status(201).json(data);
   }
 
   async updateUser(req, res) {
     const { name, email, password } = req.body;
-    const userId = req.user.id; // Supondo que o ID do usuário esteja no token JWT
+    const userId = req.user.id;
 
     try {
       const updates = {};
@@ -170,17 +222,13 @@ class IndexController {
         .eq('email', email)
         .single();
 
-        console.log("DATA", data);
-        console.log("ERROR", error);
-
-      if (error !== null) {
+      if (error) {
         return res.status(401).json({ message: 'Credenciais inválidas.' });
       }
 
       const isPasswordValid = await bcrypt.compare(password, data.password);
-      console.log("IS PASSWORD VALID", isPasswordValid);
 
-      if (isPasswordValid !== true) {
+      if (!isPasswordValid) {
         return res.status(401).json({ message: 'Credenciais inválidas.' });
       }
 
@@ -188,11 +236,8 @@ class IndexController {
         expiresIn: '1h',
       });
 
-      console.log("TOKEN", token);
-
       res.status(200).json({ token, user: { id: data.id, name: data.name, email: data.email } });
     } catch (error) {
-      console.log("ERROR LOGIN", error);
       res.status(500).json({ error: error.message });
     }
   }

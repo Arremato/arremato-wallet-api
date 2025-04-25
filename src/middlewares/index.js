@@ -12,11 +12,11 @@ export const authenticateUser = (req, res, next) => {
         return res.status(401).json({ message: 'Token não fornecido.' });
     }
 
-    const token = authHeader.split(' ')[1]; // O formato esperado é "Bearer <token>"
+    const token = authHeader.split(' ')[1]; 
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        req.user = decoded; // Adiciona os dados do usuário ao objeto `req`
+        req.user = decoded;
         next();
     } catch (error) {
         return res.status(401).json({ message: 'Token inválido ou expirado.' });
