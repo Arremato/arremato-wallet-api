@@ -8,7 +8,7 @@ const indexController = new IndexController();
 router.use((req, res, next) => {
   const openRoutes = [
     { method: 'POST', path: '/users' },
-    { method: 'POST', path: '/auth/login' },
+    { method: 'POST', path: '/login' },
   ];
 
   const isOpenRoute = openRoutes.some(
