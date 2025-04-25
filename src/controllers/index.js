@@ -128,6 +128,7 @@ class IndexController {
     try {
       const userId = req.user.id;
 
+      // Verifica se a propriedade pertence ao usuário autenticado
       const { data: property, error: propertyError } = await supabase
         .from('properties')
         .select('id')
@@ -139,16 +140,24 @@ class IndexController {
         return res.status(403).json({ error: 'Você não tem permissão para adicionar transações a esta propriedade.' });
       }
 
+      // Insere a transação financeira
       const { data, error } = await supabase
         .from('financial_transactions')
-        .insert([{ property_id, type, date, amount, category, description, receipt, funding_source }]);
+        .insert([{ property_id, type, date, amount, category, description, receipt, funding_source }])
+        .select(); // Garante que os dados inseridos sejam retornados
+
+      if (error) {
+        console.error('Erro ao salvar transação:', error);
+        return res.status(400).json({ error: error.message });
+      }
 
       if (!data || data.length === 0) {
-        return res.status(400).json({ error: error.message });
+        return res.status(500).json({ error: 'Erro ao salvar transação. Nenhum dado retornado.' });
       }
 
       res.status(201).json({ message: 'Transação criada com sucesso.', transaction: data[0] });
     } catch (error) {
+      console.error('Erro no servidor:', error);
       res.status(500).json({ error: error.message });
     }
   }
