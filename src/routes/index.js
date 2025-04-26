@@ -236,6 +236,69 @@ router.post('/transactions', indexController.createTransaction.bind(indexControl
 
 /**
  * @swagger
+ * /transactions/{id}:
+ *   put:
+ *     summary: Atualiza uma transação financeira
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID da transação
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               type:
+ *                 type: string
+ *                 enum: [expense, income]
+ *               date:
+ *                 type: string
+ *                 format: date
+ *               amount:
+ *                 type: number
+ *               category:
+ *                 type: string
+ *               description:
+ *                 type: string
+ *               receipt:
+ *                 type: string
+ *               funding_source:
+ *                 type: string
+ *     responses:
+ *       200:
+ *         description: Transação atualizada com sucesso.
+ */
+router.put('/transactions/:id', indexController.updateTransaction.bind(indexController));
+
+/**
+ * @swagger
+ * /transactions/{id}:
+ *   delete:
+ *     summary: Exclui uma transação financeira
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID da transação
+ *     responses:
+ *       200:
+ *         description: Transação excluída com sucesso.
+ */
+router.delete('/transactions/:id', indexController.deleteTransaction.bind(indexController));
+
+/**
+ * @swagger
  * /financial-summary:
  *   get:
  *     summary: Obtém o resumo financeiro do usuário

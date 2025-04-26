@@ -128,7 +128,6 @@ class IndexController {
     try {
       const userId = req.user.id;
 
-      // Verifica se a propriedade pertence ao usuário autenticado
       const { data: property, error: propertyError } = await supabase
         .from('properties')
         .select('id')
@@ -140,11 +139,10 @@ class IndexController {
         return res.status(403).json({ error: 'Você não tem permissão para adicionar transações a esta propriedade.' });
       }
 
-      // Insere a transação financeira
       const { data, error } = await supabase
         .from('financial_transactions')
         .insert([{ property_id, type, date, amount, category, description, receipt, funding_source }])
-        .select(); // Garante que os dados inseridos sejam retornados
+        .select(); 
 
       if (error) {
         console.error('Erro ao salvar transação:', error);
@@ -306,6 +304,95 @@ class IndexController {
       }
 
       res.status(200).json(transactions);
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  async deleteTransaction(req, res) {
+    const { id } = req.params; // ID da transação a ser excluída
+
+    try {
+      const userId = req.user.id;
+
+      // Verifica se a transação pertence a uma propriedade do usuário autenticado
+      const { data: transaction, error: transactionError } = await supabase
+        .from('financial_transactions')
+        .select('property_id')
+        .eq('id', id)
+        .single();
+
+      if (transactionError || !transaction) {
+        return res.status(404).json({ error: 'Transação não encontrada ou você não tem permissão para excluí-la.' });
+      }
+
+      const { data: property, error: propertyError } = await supabase
+        .from('properties')
+        .select('id')
+        .eq('id', transaction.property_id)
+        .eq('user_id', userId)
+        .single();
+
+      if (propertyError || !property) {
+        return res.status(403).json({ error: 'Você não tem permissão para excluir esta transação.' });
+      }
+
+      // Exclui a transação
+      const { error } = await supabase
+        .from('financial_transactions')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        return res.status(400).json({ error: error.message });
+      }
+
+      res.status(200).json({ message: 'Transação excluída com sucesso.' });
+    } catch (error) {
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  async updateTransaction(req, res) {
+    const { id } = req.params; // ID da transação a ser atualizada
+    const { type, date, amount, category, description, receipt, funding_source } = req.body;
+
+    try {
+      const userId = req.user.id;
+
+      // Verifica se a transação pertence a uma propriedade do usuário autenticado
+      const { data: transaction, error: transactionError } = await supabase
+        .from('financial_transactions')
+        .select('property_id')
+        .eq('id', id)
+        .single();
+
+      if (transactionError || !transaction) {
+        return res.status(404).json({ error: 'Transação não encontrada ou você não tem permissão para editá-la.' });
+      }
+
+      const { data: property, error: propertyError } = await supabase
+        .from('properties')
+        .select('id')
+        .eq('id', transaction.property_id)
+        .eq('user_id', userId)
+        .single();
+
+      if (propertyError || !property) {
+        return res.status(403).json({ error: 'Você não tem permissão para editar esta transação.' });
+      }
+
+      // Atualiza a transação
+      const { data, error } = await supabase
+        .from('financial_transactions')
+        .update({ type, date, amount, category, description, receipt, funding_source })
+        .eq('id', id);
+
+      if (error) {
+        return res.status(400).json({ error: error.message });
+      }
+
+      res.status(200).json({ message: 'Transação atualizada com sucesso.', transaction: data[0] });
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
