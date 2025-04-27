@@ -75,31 +75,77 @@ class IndexController {
   }
 
   async createProperty(req, res) {
-    const { name, location, valuation, payment_method, acquisition_date, purpose } = req.body;
+    const {
+      name,
+      postal_code,
+      address,
+      number,
+      property_type,
+      state,
+      bid_value,
+      market_value,
+      itbi,
+      registration,
+      purchased_alone,
+      investor_name,
+      invested_amount,
+      monthly_condo_fee,
+      annual_iptu,
+      condo_debt,
+      iptu_debt,
+      other_debts,
+      broker_name,
+      broker_commission,
+      expected_months_to_sell,
+      expected_renovation_cost,
+      taxation_type,
+      acquisition_date,
+      purpose
+    } = req.body;
 
     try {
       const userId = req.user.id;
-      console.log('User ID:', userId);
 
       const { data, error } = await supabase
         .from('properties')
-        .insert([{ user_id: userId, name, location, valuation, payment_method, acquisition_date, purpose }])
+        .insert([{
+          user_id: userId,
+          name,
+          postal_code,
+          address,
+          number,
+          property_type,
+          state,
+          bid_value,
+          market_value,
+          itbi,
+          registration,
+          purchased_alone,
+          investor_name,
+          invested_amount,
+          monthly_condo_fee,
+          annual_iptu,
+          condo_debt,
+          iptu_debt,
+          other_debts,
+          broker_name,
+          broker_commission,
+          expected_months_to_sell,
+          expected_renovation_cost,
+          taxation_type,
+          acquisition_date,
+          purpose
+        }])
         .select();
 
-      console.log('Resposta do Supabase:', { data, error });
-
-      if (error) {
-        console.error('Supabase Error:', error);
+      if (error ==! null) {
+        console.error('Erro ao cadastrar imóvel:', error);
         return res.status(400).json({ error: error.message });
       }
 
-      if (!data || data.length === 0) {
-        return res.status(500).json({ error: 'Erro ao criar propriedade. Nenhum dado retornado.' });
-      }
-
-      res.status(201).json({ message: 'Imóvel criado com sucesso.', property: data[0] });
+      res.status(201).json({ message: 'Imóvel cadastrado com sucesso.', property: data[0] });
     } catch (error) {
-      console.error('Catch Error:', error);
+      console.error('Erro no servidor:', error);
       res.status(500).json({ error: error.message });
     }
   }
