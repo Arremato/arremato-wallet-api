@@ -100,7 +100,14 @@ class IndexController {
       expected_renovation_cost,
       taxation_type,
       acquisition_date,
-      purpose
+      purpose,
+      payment_method, // Novo campo
+      down_payment, // Novo campo
+      installments, // Novo campo
+      installment_value, // Novo campo
+      auction_origin, // Novo campo
+      legal_status, // Novo campo
+      registered_in // Novo campo
     } = req.body;
 
     try {
@@ -134,11 +141,18 @@ class IndexController {
           expected_renovation_cost,
           taxation_type,
           acquisition_date,
-          purpose
+          purpose,
+          payment_method, // Novo campo
+          down_payment, // Novo campo
+          installments, // Novo campo
+          installment_value, // Novo campo
+          auction_origin, // Novo campo
+          legal_status, // Novo campo
+          registered_in // Novo campo
         }])
         .select();
 
-      if (error ==! null) {
+      if (error) {
         console.error('Erro ao cadastrar imóvel:', error);
         return res.status(400).json({ error: error.message });
       }
