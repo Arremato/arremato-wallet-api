@@ -139,16 +139,22 @@ router.get('/properties', indexController.getProperties.bind(indexController));
  *           schema:
  *             type: object
  *             properties:
- *               user_id:
- *                 type: string
  *               name:
  *                 type: string
- *               location:
+ *               postal_code:
  *                 type: string
- *               valuation:
+ *               address:
+ *                 type: string
+ *               number:
+ *                 type: string
+ *               property_type:
+ *                 type: string
+ *               state:
+ *                 type: string
+ *               bid_value:
  *                 type: number
- *               payment_method:
- *                 type: string
+ *               market_value:
+ *                 type: number
  *               acquisition_date:
  *                 type: string
  *                 format: date
@@ -158,14 +164,23 @@ router.get('/properties', indexController.getProperties.bind(indexController));
  *     responses:
  *       201:
  *         description: Imóvel criado com sucesso.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 property:
+ *                   type: object
  */
 router.post('/properties', indexController.createProperty.bind(indexController));
 
 /**
  * @swagger
- * /processes:
+ * /tasks:
  *   post:
- *     summary: Cria uma nova tarefa para um imóvel
+ *     summary: Cria uma nova tarefa
  *     security:
  *       - BearerAuth: []
  *     requestBody:
@@ -177,24 +192,169 @@ router.post('/properties', indexController.createProperty.bind(indexController))
  *             properties:
  *               property_id:
  *                 type: string
- *               activity:
+ *                 description: ID da propriedade à qual a tarefa está vinculada
+ *               name:
  *                 type: string
+ *                 description: Nome da tarefa
  *               status:
  *                 type: string
- *                 enum: [pending, in progress, completed, blocked]
- *               progress:
- *                 type: integer
- *                 minimum: 0
- *                 maximum: 100
- *               description:
+ *                 enum: [pending, in progress, completed]
+ *                 description: Status inicial da tarefa
+ *               priority:
  *                 type: string
- *               updated_by:
- *                 type: string
+ *                 enum: [low, medium, high]
+ *                 description: Prioridade da tarefa
  *     responses:
  *       201:
  *         description: Tarefa criada com sucesso.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 task:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                     property_id:
+ *                       type: string
+ *                     name:
+ *                       type: string
+ *                     status:
+ *                       type: string
+ *                     priority:
+ *                       type: string
+ *                     created_at:
+ *                       type: string
+ *                       format: date-time
  */
-router.post('/processes', indexController.createProcess.bind(indexController));
+router.post('/tasks', indexController.createTask.bind(indexController));
+
+/**
+ * @swagger
+ * /tasks/{id}:
+ *   delete:
+ *     summary: Exclui uma tarefa
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID da tarefa
+ *     responses:
+ *       200:
+ *         description: Tarefa excluída com sucesso.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       404:
+ *         description: Tarefa não encontrada ou permissão negada.
+ *       403:
+ *         description: Permissão negada para excluir a tarefa.
+ */
+router.delete('/tasks/:id', indexController.deleteTask.bind(indexController));
+
+/**
+ * @swagger
+ * /tasks/{id}/status:
+ *   patch:
+ *     summary: Atualiza o status de uma tarefa
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID da tarefa
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               status:
+ *                 type: string
+ *                 enum: [pending, in progress, completed]
+ *                 description: Novo status da tarefa
+ *     responses:
+ *       200:
+ *         description: Status da tarefa atualizado com sucesso.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 task:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                     property_id:
+ *                       type: string
+ *                     name:
+ *                       type: string
+ *                     status:
+ *                       type: string
+ *                     updated_at:
+ *                       type: string
+ *                       format: date-time
+ */
+router.patch('/tasks/:id/status', indexController.updateTaskStatus.bind(indexController));
+
+/**
+ * @swagger
+ * /tasks:
+ *   get:
+ *     summary: Lista todas as tarefas relacionadas ao usuário autenticado
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de tarefas retornada com sucesso.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: string
+ *                   user_id:
+ *                     type: string
+ *                   property_id:
+ *                     type: string
+ *                   name:
+ *                     type: string
+ *                   status:
+ *                     type: string
+ *                     enum: [pending, in progress, completed]
+ *                   priority:
+ *                     type: string
+ *                     enum: [low, medium, high]
+ *                   created_at:
+ *                     type: string
+ *                     format: date-time
+ *                   updated_at:
+ *                     type: string
+ *                     format: date-time
+ */
+router.get('/tasks', indexController.getTasks.bind(indexController));
 
 /**
  * @swagger
