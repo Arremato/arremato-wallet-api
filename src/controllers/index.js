@@ -889,6 +889,57 @@ class IndexController {
       res.status(500).json({ error: error.message });
     }
   }
+
+  async deleteFinance(req, res) {
+    const { id } = req.params; // ID da transação a ser excluída
+
+    try {
+      const userId = req.user.id;
+
+      // Verifica se a transação pertence ao usuário autenticado
+      const { data: transaction, error: transactionError } = await supabase
+        .from('financial_transactions')
+        .select('id, parent_id, user_id')
+        .eq('id', id)
+        .single();
+
+      if (transactionError || !transaction || transaction.user_id !== userId) {
+        return res.status(403).json({ error: 'Você não tem permissão para excluir esta transação.' });
+      }
+
+      // Determina se é uma transação "mãe" ou uma parcela
+      const isParentTransaction = !transaction.parent_id;
+
+      if (isParentTransaction) {
+        // Exclui todas as parcelas relacionadas à transação "mãe"
+        const { error: deleteError } = await supabase
+          .from('financial_transactions')
+          .delete()
+          .or(`id.eq.${id},parent_id.eq.${id}`); // Exclui a transação "mãe" e todas as parcelas
+
+        if (deleteError) {
+          return res.status(400).json({ error: deleteError.message });
+        }
+
+        return res.status(200).json({ message: 'Transação e todas as parcelas relacionadas foram excluídas com sucesso.' });
+      } else {
+        // Exclui todas as parcelas relacionadas à mesma transação "mãe"
+        const { error: deleteError } = await supabase
+          .from('financial_transactions')
+          .delete()
+          .eq('parent_id', transaction.parent_id);
+
+        if (deleteError) {
+          return res.status(400).json({ error: deleteError.message });
+        }
+
+        return res.status(200).json({ message: 'Todas as parcelas relacionadas foram excluídas com sucesso.' });
+      }
+    } catch (error) {
+      console.error('Erro no servidor:', error);
+      res.status(500).json({ error: error.message });
+    }
+  }
 }
 
 export default IndexController;

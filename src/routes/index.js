@@ -503,9 +503,9 @@ router.put('/finances/:id', indexController.updateFinance.bind(indexController))
 
 /**
  * @swagger
- * /transactions/{id}:
+ * /finances/{id}:
  *   delete:
- *     summary: Exclui uma transação financeira
+ *     summary: Exclui uma transação financeira ou todas as parcelas relacionadas
  *     security:
  *       - BearerAuth: []
  *     parameters:
@@ -514,12 +514,23 @@ router.put('/finances/:id', indexController.updateFinance.bind(indexController))
  *         required: true
  *         schema:
  *           type: string
- *         description: ID da transação
+ *         description: ID da transação financeira
  *     responses:
  *       200:
  *         description: Transação excluída com sucesso.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *       403:
+ *         description: Permissão negada para excluir a transação.
+ *       404:
+ *         description: Transação não encontrada.
  */
-router.delete('/transactions/:id', indexController.deleteTransaction.bind(indexController));
+router.delete('/finances/:id', indexController.deleteFinance.bind(indexController));
 
 /**
  * @swagger
