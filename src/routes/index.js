@@ -372,25 +372,56 @@ router.get('/tasks', indexController.getTasks.bind(indexController));
  *             properties:
  *               property_id:
  *                 type: string
+ *                 description: ID do imóvel relacionado (pode ser NULL)
  *               type:
  *                 type: string
  *                 enum: [expense, income]
+ *                 description: Tipo da transação (despesa ou receita)
+ *               category_id:
+ *                 type: string
+ *                 description: ID da categoria da transação
  *               date:
  *                 type: string
  *                 format: date
+ *                 description: Data da transação
  *               amount:
  *                 type: number
- *               category:
+ *                 description: Valor da transação
+ *               status:
  *                 type: string
+ *                 enum: [paid, pending]
+ *                 description: Status da transação
+ *               payment_method:
+ *                 type: string
+ *                 enum: [cash, financed, installment]
+ *                 description: Método de pagamento
+ *               total_installments:
+ *                 type: integer
+ *                 description: Total de parcelas (se parcelado)
+ *               current_installment:
+ *                 type: integer
+ *                 description: Parcela atual (se parcelado)
+ *               parent_id:
+ *                 type: string
+ *                 description: ID da transação "mãe" (se parcelado)
  *               description:
  *                 type: string
- *               receipt:
- *                 type: string
- *               funding_source:
- *                 type: string
+ *                 description: Descrição opcional da transação
+ *               installment_value:
+ *                 type: number
+ *                 description: Valor da parcela (se parcelado)
  *     responses:
  *       201:
  *         description: Transação registrada com sucesso.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 transaction:
+ *                   type: object
  */
 router.post('/transactions', indexController.createTransaction.bind(indexController));
 
@@ -549,6 +580,310 @@ router.get('/expense-types', indexController.getExpenseTypes.bind(indexControlle
  *         description: Lista de transações financeiras.
  */
 router.get('/transactions', indexController.getTransactions.bind(indexController));
+
+/**
+ * @swagger
+ * /finances:
+ *   post:
+ *     summary: Registra uma nova transação financeira
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               property_id:
+ *                 type: string
+ *                 description: ID do imóvel relacionado (pode ser NULL)
+ *               type:
+ *                 type: string
+ *                 enum: [expense, income]
+ *                 description: Tipo da transação (despesa ou receita)
+ *               category_id:
+ *                 type: string
+ *                 description: ID da categoria da transação
+ *               date:
+ *                 type: string
+ *                 format: date
+ *                 description: Data da transação
+ *               amount:
+ *                 type: number
+ *                 description: Valor da transação
+ *               status:
+ *                 type: string
+ *                 enum: [paid, pending]
+ *                 description: Status da transação
+ *               payment_method:
+ *                 type: string
+ *                 enum: [cash, financed, installment]
+ *                 description: Método de pagamento
+ *               total_installments:
+ *                 type: integer
+ *                 description: Total de parcelas (se parcelado)
+ *               current_installment:
+ *                 type: integer
+ *                 description: Parcela atual (se parcelado)
+ *               parent_id:
+ *                 type: string
+ *                 description: ID da transação "mãe" (se parcelado)
+ *               description:
+ *                 type: string
+ *                 description: Descrição opcional da transação
+ *               installment_value:
+ *                 type: number
+ *                 description: Valor da parcela (se parcelado)
+ *     responses:
+ *       201:
+ *         description: Transação registrada com sucesso.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 transaction:
+ *                   type: object
+ */
+router.post('/finances', indexController.createFinance.bind(indexController));
+
+/**
+ * @swagger
+ * /finances/installments:
+ *   post:
+ *     summary: Registra uma nova despesa parcelada
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               property_id:
+ *                 type: string
+ *                 description: ID do imóvel relacionado (pode ser NULL)
+ *               type:
+ *                 type: string
+ *                 enum: [expense]
+ *                 description: Tipo da transação (apenas despesa permitida)
+ *               category_id:
+ *                 type: string
+ *                 description: ID da categoria da transação
+ *               date:
+ *                 type: string
+ *                 format: date
+ *                 description: Data inicial da transação
+ *               amount:
+ *                 type: number
+ *                 description: Valor total da despesa
+ *               total_installments:
+ *                 type: integer
+ *                 description: Total de parcelas
+ *               description:
+ *                 type: string
+ *                 description: Descrição opcional da transação
+ *     responses:
+ *       201:
+ *         description: Despesas parceladas registradas com sucesso.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 transactions:
+ *                   type: array
+ *                   items:
+ *                     type: object
+ *                     properties:
+ *                       installment_value:
+ *                         type: number
+ *                         description: Valor da parcela
+ */
+router.post('/finances/installments', indexController.createInstallmentFinance.bind(indexController));
+
+/**
+ * @swagger
+ * /finances:
+ *   get:
+ *     summary: Lista todas as transações financeiras relacionadas ao usuário autenticado
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de transações financeiras retornada com sucesso.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: string
+ *                   property_id:
+ *                     type: string
+ *                   user_id:
+ *                     type: string
+ *                   type:
+ *                     type: string
+ *                     enum: [expense, income]
+ *                   category_id:
+ *                     type: string
+ *                   date:
+ *                     type: string
+ *                     format: date
+ *                   amount:
+ *                     type: number
+ *                   status:
+ *                     type: string
+ *                     enum: [paid, pending]
+ *                   payment_method:
+ *                     type: string
+ *                     enum: [cash, financed, installment]
+ *                   total_installments:
+ *                     type: integer
+ *                   current_installment:
+ *                     type: integer
+ *                   parent_id:
+ *                     type: string
+ *                   description:
+ *                     type: string
+ *                   created_at:
+ *                     type: string
+ *                     format: date-time
+ */
+router.get('/finances', indexController.getUserFinances.bind(indexController));
+
+/**
+ * @swagger
+ * /finances/property/{property_id}:
+ *   get:
+ *     summary: Lista todas as transações financeiras relacionadas a um imóvel
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: property_id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID do imóvel
+ *     responses:
+ *       200:
+ *         description: Lista de transações financeiras retornada com sucesso.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: string
+ *                   property_id:
+ *                     type: string
+ *                   user_id:
+ *                     type: string
+ *                   type:
+ *                     type: string
+ *                     enum: [expense, income]
+ *                   category_id:
+ *                     type: string
+ *                   date:
+ *                     type: string
+ *                     format: date
+ *                   amount:
+ *                     type: number
+ *                   status:
+ *                     type: string
+ *                     enum: [paid, pending]
+ *                   payment_method:
+ *                     type: string
+ *                     enum: [cash, financed, installment]
+ *                   total_installments:
+ *                     type: integer
+ *                   current_installment:
+ *                     type: integer
+ *                   parent_id:
+ *                     type: string
+ *                   description:
+ *                     type: string
+ *                   created_at:
+ *                     type: string
+ *                     format: date-time
+ */
+router.get('/finances/property/:property_id', indexController.getPropertyFinances.bind(indexController));
+
+/**
+ * @swagger
+ * /categories:
+ *   get:
+ *     summary: Lista todas as categorias
+ *     responses:
+ *       200:
+ *         description: Lista de categorias retornada com sucesso.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: string
+ *                   name:
+ *                     type: string
+ *                   description:
+ *                     type: string
+ */
+router.get('/categories', indexController.getCategories.bind(indexController));
+
+/**
+ * @swagger
+ * /categories:
+ *   post:
+ *     summary: Cria uma nova categoria
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: Nome da categoria
+ *               description:
+ *                 type: string
+ *                 description: Descrição da categoria
+ *     responses:
+ *       201:
+ *         description: Categoria criada com sucesso.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 category:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                     name:
+ *                       type: string
+ *                     description:
+ *                       type: string
+ */
+router.post('/categories', indexController.createCategory.bind(indexController));
 
 export function setRoutes(app) {
   app.use('/api', router);

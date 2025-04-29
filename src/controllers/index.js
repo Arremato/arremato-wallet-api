@@ -611,6 +611,210 @@ class IndexController {
       res.status(500).json({ error: error.message });
     }
   }
+
+  async createInstallmentFinance(req, res) {
+    const {
+      property_id,
+      type,
+      category_id,
+      date,
+      amount,
+      total_installments,
+      description
+    } = req.body;
+
+    try {
+      const userId = req.user.id;
+
+      const installmentValue = amount / total_installments;
+      const transactions = [];
+
+      for (let i = 1; i <= total_installments; i++) {
+        transactions.push({
+          user_id: userId,
+          property_id,
+          type,
+          category_id,
+          date: new Date(new Date(date).setMonth(new Date(date).getMonth() + i - 1)), // Incrementa os meses
+          amount: installmentValue,
+          status: 'pending',
+          payment_method: 'installment',
+          total_installments,
+          current_installment: i,
+          description,
+          installment_value: installmentValue
+        });
+      }
+
+      const { data, error } = await supabase
+        .from('financial_transactions')
+        .insert(transactions)
+        .select();
+
+      if (error) {
+        console.error('Erro ao salvar transações parceladas:', error);
+        return res.status(400).json({ error: error.message });
+      }
+
+      res.status(201).json({ message: 'Despesas parceladas criadas com sucesso.', transactions: data });
+    } catch (error) {
+      console.error('Erro no servidor:', error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  async getUserFinances(req, res) {
+    try {
+      const userId = req.user.id;
+
+      const { data, error } = await supabase
+        .from('financial_transactions')
+        .select('*')
+        .eq('user_id', userId);
+
+      if (error) {
+        return res.status(500).json({ error: error.message });
+      }
+
+      res.status(200).json(data);
+    } catch (error) {
+      console.error('Erro no servidor:', error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  async getPropertyFinances(req, res) {
+    const { property_id } = req.params;
+
+    try {
+      const userId = req.user.id;
+
+      // Verifica se o imóvel pertence ao usuário autenticado
+      const { data: property, error: propertyError } = await supabase
+        .from('properties')
+        .select('id')
+        .eq('id', property_id)
+        .eq('user_id', userId)
+        .single();
+
+      if (propertyError || !property) {
+        return res.status(403).json({ error: 'Você não tem permissão para acessar as finanças deste imóvel.' });
+      }
+
+      const { data, error } = await supabase
+        .from('financial_transactions')
+        .select('*')
+        .eq('property_id', property_id);
+
+      if (error) {
+        return res.status(500).json({ error: error.message });
+      }
+
+      res.status(200).json(data);
+    } catch (error) {
+      console.error('Erro no servidor:', error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  async createFinance(req, res) {
+    const {
+      property_id,
+      type,
+      category_id,
+      date,
+      amount,
+      status,
+      payment_method,
+      total_installments,
+      current_installment,
+      parent_id,
+      description,
+      installment_value
+    } = req.body;
+
+    try {
+      const userId = req.user.id;
+
+      // Validação e conversão do campo `amount`
+      const parsedAmount = parseFloat(amount);
+      if (isNaN(parsedAmount) || parsedAmount <= 0) {
+        return res.status(400).json({ error: 'O campo "amount" deve ser um número válido maior que zero.' });
+      }
+
+      // Validação e conversão do campo `installment_value` (se aplicável)
+      const parsedInstallmentValue = installment_value ? parseFloat(installment_value) : null;
+      if (installment_value && (isNaN(parsedInstallmentValue) || parsedInstallmentValue <= 0)) {
+        return res.status(400).json({ error: 'O campo "installment_value" deve ser um número válido maior que zero.' });
+      }
+
+      const { data, error } = await supabase
+        .from('financial_transactions')
+        .insert([{
+          user_id: userId,
+          property_id,
+          type,
+          category_id,
+          date,
+          amount: parsedAmount,
+          status,
+          payment_method,
+          total_installments,
+          current_installment,
+          parent_id,
+          description,
+          installment_value: parsedInstallmentValue
+        }])
+        .select();
+
+      if (error) {
+        console.error('Erro ao salvar transação:', error);
+        return res.status(400).json({ error: error.message });
+      }
+
+      res.status(201).json({ message: 'Transação criada com sucesso.', transaction: data[0] });
+    } catch (error) {
+      console.error('Erro no servidor:', error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  async getCategories(req, res) {
+    try {
+      const { data, error } = await supabase
+        .from('categories')
+        .select('*');
+
+      if (error) {
+        return res.status(500).json({ error: error.message });
+      }
+
+      res.status(200).json(data);
+    } catch (error) {
+      console.error('Erro no servidor:', error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  async createCategory(req, res) {
+    const { name, description } = req.body;
+
+    try {
+      const { data, error } = await supabase
+        .from('categories')
+        .insert([{ name, description }])
+        .select();
+
+      if (error) {
+        return res.status(400).json({ error: error.message });
+      }
+
+      res.status(201).json({ message: 'Categoria criada com sucesso.', category: data[0] });
+    } catch (error) {
+      console.error('Erro no servidor:', error);
+      res.status(500).json({ error: error.message });
+    }
+  }
 }
 
 export default IndexController;
