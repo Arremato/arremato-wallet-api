@@ -429,7 +429,7 @@ router.post('/transactions', indexController.createTransaction.bind(indexControl
  * @swagger
  * /transactions/{id}:
  *   put:
- *     summary: Atualiza uma transação financeira
+ *     summary: Atualiza uma transação financeira existente
  *     security:
  *       - BearerAuth: []
  *     parameters:
@@ -438,7 +438,7 @@ router.post('/transactions', indexController.createTransaction.bind(indexControl
  *         required: true
  *         schema:
  *           type: string
- *         description: ID da transação
+ *         description: ID da transação financeira
  *     requestBody:
  *       required: true
  *       content:
@@ -446,27 +446,60 @@ router.post('/transactions', indexController.createTransaction.bind(indexControl
  *           schema:
  *             type: object
  *             properties:
+ *               property_id:
+ *                 type: string
+ *                 description: ID do imóvel relacionado (pode ser NULL)
  *               type:
  *                 type: string
  *                 enum: [expense, income]
+ *                 description: Tipo da transação (despesa ou receita)
+ *               category_id:
+ *                 type: string
+ *                 description: ID da categoria da transação
  *               date:
  *                 type: string
  *                 format: date
+ *                 description: Data da transação
  *               amount:
  *                 type: number
- *               category:
+ *                 description: Valor da transação
+ *               status:
  *                 type: string
+ *                 enum: [paid, pending]
+ *                 description: Status da transação
+ *               payment_method:
+ *                 type: string
+ *                 enum: [cash, financed, installment]
+ *                 description: Método de pagamento
+ *               total_installments:
+ *                 type: integer
+ *                 description: Total de parcelas (se parcelado)
+ *               current_installment:
+ *                 type: integer
+ *                 description: Parcela atual (se parcelado)
+ *               parent_id:
+ *                 type: string
+ *                 description: ID da transação "mãe" (se parcelado)
  *               description:
  *                 type: string
- *               receipt:
- *                 type: string
- *               funding_source:
- *                 type: string
+ *                 description: Descrição opcional da transação
+ *               installment_value:
+ *                 type: number
+ *                 description: Valor da parcela (se parcelado)
  *     responses:
  *       200:
  *         description: Transação atualizada com sucesso.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 transaction:
+ *                   type: object
  */
-router.put('/transactions/:id', indexController.updateTransaction.bind(indexController));
+router.put('/finances/:id', indexController.updateFinance.bind(indexController));
 
 /**
  * @swagger
