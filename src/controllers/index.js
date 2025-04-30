@@ -940,6 +940,105 @@ class IndexController {
       res.status(500).json({ error: error.message });
     }
   }
+
+  async getPropertyTasks(req, res) {
+    const { id } = req.params; // ID do imóvel
+
+    try {
+      const userId = req.user.id;
+
+      // Verifica se o imóvel pertence ao usuário autenticado
+      const { data: property, error: propertyError } = await supabase
+        .from('properties')
+        .select('id')
+        .eq('id', id)
+        .eq('user_id', userId)
+        .single();
+
+      if (propertyError || !property) {
+        return res.status(403).json({ error: 'Você não tem permissão para acessar as tarefas deste imóvel.' });
+      }
+
+      // Busca as tarefas relacionadas ao imóvel
+      const { data: tasks, error: tasksError } = await supabase
+        .from('tasks')
+        .select('*')
+        .eq('property_id', id);
+
+      if (tasksError) {
+        return res.status(500).json({ error: tasksError.message });
+      }
+
+      res.status(200).json(tasks);
+    } catch (error) {
+      console.error('Erro no servidor:', error);
+      res.status(500).json({ error: error.message });
+    }
+  }
+
+  async updateTask(req, res) {
+    const { id } = req.params; // ID da tarefa a ser atualizada
+    const { name, status, priority } = req.body;
+  
+    try {
+      const userId = req.user.id;
+  
+      // Valida o status, se fornecido
+      const validStatuses = ['pending', 'in progress', 'completed'];
+      if (status && !validStatuses.includes(status)) {
+        return res.status(400).json({ error: `O status deve ser um dos seguintes valores: ${validStatuses.join(', ')}` });
+      }
+  
+      // Valida a prioridade, se fornecida
+      const validPriorities = ['low', 'medium', 'high'];
+      if (priority && !validPriorities.includes(priority)) {
+        return res.status(400).json({ error: `A prioridade deve ser um dos seguintes valores: ${validPriorities.join(', ')}` });
+      }
+  
+      // Verifica se a tarefa pertence a uma propriedade do usuário autenticado
+      const { data: task, error: taskError } = await supabase
+        .from('tasks')
+        .select('property_id')
+        .eq('id', id)
+        .single();
+  
+      if (taskError || !task) {
+        return res.status(404).json({ error: 'Tarefa não encontrada ou você não tem permissão para editá-la.' });
+      }
+  
+      const { data: property, error: propertyError } = await supabase
+        .from('properties')
+        .select('id')
+        .eq('id', task.property_id)
+        .eq('user_id', userId)
+        .single();
+  
+      if (propertyError || !property) {
+        return res.status(403).json({ error: 'Você não tem permissão para editar esta tarefa.' });
+      }
+  
+      // Atualiza a tarefa
+      const updates = {};
+      if (name) updates.name = name;
+      if (status) updates.status = status;
+      if (priority) updates.priority = priority;
+  
+      const { data, error } = await supabase
+        .from('tasks')
+        .update({ ...updates, updated_at: new Date() })
+        .eq('id', id)
+        .select();
+  
+      if (error) {
+        return res.status(400).json({ error: error.message });
+      }
+  
+      res.status(200).json({ message: 'Tarefa atualizada com sucesso.', task: data[0] });
+    } catch (error) {
+      console.error('Erro no servidor:', error);
+      res.status(500).json({ error: error.message });
+    }
+  }
 }
 
 export default IndexController;

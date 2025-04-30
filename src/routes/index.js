@@ -358,6 +358,120 @@ router.get('/tasks', indexController.getTasks.bind(indexController));
 
 /**
  * @swagger
+ * /tasks/property/{id}:
+ *   get:
+ *     summary: Lista todas as tarefas relacionadas a um imóvel
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID do imóvel
+ *     responses:
+ *       200:
+ *         description: Lista de tarefas retornada com sucesso.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: string
+ *                   property_id:
+ *                     type: string
+ *                   name:
+ *                     type: string
+ *                   status:
+ *                     type: string
+ *                     enum: [pending, in progress, completed]
+ *                   priority:
+ *                     type: string
+ *                     enum: [low, medium, high]
+ *                   created_at:
+ *                     type: string
+ *                     format: date-time
+ *                   updated_at:
+ *                     type: string
+ *                     format: date-time
+ *       403:
+ *         description: Permissão negada para acessar as tarefas do imóvel.
+ *       404:
+ *         description: Imóvel não encontrado.
+ */
+router.get('/tasks/property/:id', indexController.getPropertyTasks.bind(indexController));
+
+/**
+ * @swagger
+ * /tasks/{id}:
+ *   put:
+ *     summary: Atualiza uma tarefa existente
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID da tarefa
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *                 description: Nome da tarefa
+ *               status:
+ *                 type: string
+ *                 enum: [pending, in progress, completed]
+ *                 description: Status da tarefa
+ *               priority:
+ *                 type: string
+ *                 enum: [low, medium, high]
+ *                 description: Prioridade da tarefa
+ *     responses:
+ *       200:
+ *         description: Tarefa atualizada com sucesso.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                 task:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                     property_id:
+ *                       type: string
+ *                     name:
+ *                       type: string
+ *                     status:
+ *                       type: string
+ *                     priority:
+ *                       type: string
+ *                     updated_at:
+ *                       type: string
+ *                       format: date-time
+ *       403:
+ *         description: Permissão negada para editar a tarefa.
+ *       404:
+ *         description: Tarefa não encontrada.
+ */
+router.put('/tasks/:id', indexController.updateTask.bind(indexController));
+
+/**
+ * @swagger
  * /transactions:
  *   post:
  *     summary: Registra uma nova transação financeira
