@@ -116,7 +116,7 @@ router.put('/users', updateUser.bind(UserController));
  *       401:
  *         description: Credenciais inválidas.
  */
-router.post('/login', login.bind(login));
+router.post('/login', login());
 
 /**
  * @swagger
