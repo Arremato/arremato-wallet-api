@@ -1,12 +1,12 @@
 import express from 'express';
 import { authenticateUser } from '../middlewares/index.js';
 import IndexController from '../controllers/index.js';
-import UserController, { getUsers, createUser, updateUser } from '../controllers/userController.js';
-import AuthController, { login } from '../controllers/authController.js'
-import PropertiesController, { getProperties, getUserProperties, createProperty } from '../controllers/propertiesController.js'
-import TasksController, { createTask, updateTaskStatus, getTasks, deleteTask, getPropertyTasks, updateTask } from '../controllers/tasksController.js'
-import TransactionController, { createTransaction, getFinancialSummary, getTransactions, createInstallmentFinance, getUserFinances, getPropertyFinances, createFinance, updateFinance, deleteFinance } from '../controllers/transactionsController.js'
-import CategoryController, {getCategories, createCategory} from '../controllers/categoryController.js';
+import { getUsers, createUser, updateUser } from '../controllers/userController.js';
+import { login } from '../controllers/authController.js'
+import { getProperties, getUserProperties, createProperty } from '../controllers/propertiesController.js'
+import { createTask, updateTaskStatus, getTasks, deleteTask, getPropertyTasks, updateTask } from '../controllers/tasksController.js'
+import { createTransaction, getFinancialSummary, getTransactions, createInstallmentFinance, getUserFinances, getPropertyFinances, createFinance, updateFinance, deleteFinance } from '../controllers/transactionsController.js'
+import {getCategories, createCategory} from '../controllers/categoryController.js';
 
 const router = express.Router();
 const indexController = new IndexController();
@@ -42,7 +42,7 @@ router.use((req, res, next) => {
  *       200:
  *         description: Lista de usuários.
  */
-router.get('/users', getUsers.bind(UserController));
+router.get('/users', getUsers());
 
 /**
  * @swagger
@@ -66,7 +66,7 @@ router.get('/users', getUsers.bind(UserController));
  *       201:
  *         description: Usuário criado com sucesso.
  */
-router.post('/users', createUser.bind(UserController));
+router.post('/users', createUser());
 
 /**
  * @swagger
@@ -92,7 +92,7 @@ router.post('/users', createUser.bind(UserController));
  *       200:
  *         description: Usuário atualizado com sucesso.
  */
-router.put('/users', updateUser.bind(UserController));
+router.put('/users', updateUser());
 
 /**
  * @swagger
@@ -129,7 +129,7 @@ router.post('/login', login());
  *       200:
  *         description: Lista de imóveis.
  */
-router.get('/properties', getProperties.bind(PropertiesController));
+router.get('/properties', getProperties());
 
 /**
  * @swagger
@@ -180,7 +180,7 @@ router.get('/properties', getProperties.bind(PropertiesController));
  *                 property:
  *                   type: object
  */
-router.post('/properties', createProperty.bind(PropertiesController));
+router.post('/properties', createProperty());
 
 /**
  * @swagger
@@ -237,7 +237,7 @@ router.post('/properties', createProperty.bind(PropertiesController));
  *                       type: string
  *                       format: date-time
  */
-router.post('/tasks', createTask.bind(TasksController));
+router.post('/tasks', createTask());
 
 /**
  * @swagger
@@ -268,7 +268,7 @@ router.post('/tasks', createTask.bind(TasksController));
  *       403:
  *         description: Permissão negada para excluir a tarefa.
  */
-router.delete('/tasks/:id', deleteTask.bind(TasksController));
+router.delete('/tasks/:id', deleteTask());
 
 /**
  * @swagger
@@ -320,7 +320,7 @@ router.delete('/tasks/:id', deleteTask.bind(TasksController));
  *                       type: string
  *                       format: date-time
  */
-router.patch('/tasks/:id/status', updateTaskStatus.bind(TasksController));
+router.patch('/tasks/:id/status', updateTaskStatus());
 
 /**
  * @swagger
@@ -360,7 +360,7 @@ router.patch('/tasks/:id/status', updateTaskStatus.bind(TasksController));
  *                     type: string
  *                     format: date-time
  */
-router.get('/tasks', getTasks.bind(TasksController));
+router.get('/tasks', getTasks());
 
 /**
  * @swagger
@@ -409,7 +409,7 @@ router.get('/tasks', getTasks.bind(TasksController));
  *       404:
  *         description: Imóvel não encontrado.
  */
-router.get('/tasks/property/:id', getPropertyTasks.bind(TasksController));
+router.get('/tasks/property/:id', getPropertyTasks());
 
 /**
  * @swagger
@@ -474,7 +474,7 @@ router.get('/tasks/property/:id', getPropertyTasks.bind(TasksController));
  *       404:
  *         description: Tarefa não encontrada.
  */
-router.put('/tasks/:id', updateTask.bind(TasksController));
+router.put('/tasks/:id', updateTask());
 
 /**
  * @swagger
@@ -543,7 +543,7 @@ router.put('/tasks/:id', updateTask.bind(TasksController));
  *                 transaction:
  *                   type: object
  */
-router.post('/transactions', createTransaction.bind(TransactionController));
+router.post('/transactions', createTransaction());
 
 /**
  * @swagger
@@ -619,7 +619,7 @@ router.post('/transactions', createTransaction.bind(TransactionController));
  *                 transaction:
  *                   type: object
  */
-router.put('/finances/:id', updateFinance.bind(TransactionController));
+router.put('/finances/:id', updateFinance());
 
 /**
  * @swagger
@@ -650,7 +650,7 @@ router.put('/finances/:id', updateFinance.bind(TransactionController));
  *       404:
  *         description: Transação não encontrada.
  */
-router.delete('/finances/:id', deleteFinance.bind(TransactionController));
+router.delete('/finances/:id', deleteFinance());
 
 /**
  * @swagger
@@ -670,7 +670,7 @@ router.delete('/finances/:id', deleteFinance.bind(TransactionController));
  *       200:
  *         description: Resumo financeiro retornado com sucesso.
  */
-router.get('/financial-summary', getFinancialSummary.bind(TransactionController));
+router.get('/financial-summary', getFinancialSummary());
 
 /**
  * @swagger
@@ -719,7 +719,7 @@ router.post('/loans', indexController.createLoan.bind(indexController));
  *       200:
  *         description: Lista de imóveis retornada com sucesso.
  */
-router.get('/user-properties', getUserProperties.bind(PropertiesController));
+router.get('/user-properties', getUserProperties());
 
 /**
  * @swagger
@@ -743,7 +743,7 @@ router.get('/expense-types', indexController.getExpenseTypes.bind(indexControlle
  *       200:
  *         description: Lista de transações financeiras.
  */
-router.get('/transactions', getTransactions.bind(TransactionController));
+router.get('/transactions', getTransactions());
 
 /**
  * @swagger
@@ -812,7 +812,7 @@ router.get('/transactions', getTransactions.bind(TransactionController));
  *                 transaction:
  *                   type: object
  */
-router.post('/finances', createFinance.bind(TransactionController));
+router.post('/finances', createFinance());
 
 /**
  * @swagger
@@ -870,7 +870,7 @@ router.post('/finances', createFinance.bind(TransactionController));
  *                         type: number
  *                         description: Valor da parcela
  */
-router.post('/finances/installments', createInstallmentFinance.bind(TransactionController));
+router.post('/finances/installments', createInstallmentFinance());
 
 /**
  * @swagger
@@ -923,7 +923,7 @@ router.post('/finances/installments', createInstallmentFinance.bind(TransactionC
  *                     type: string
  *                     format: date-time
  */
-router.get('/finances', getUserFinances.bind(TransactionController));
+router.get('/finances', getUserFinances());
 
 /**
  * @swagger
@@ -983,7 +983,7 @@ router.get('/finances', getUserFinances.bind(TransactionController));
  *                     type: string
  *                     format: date-time
  */
-router.get('/finances/property/:property_id', getPropertyFinances.bind(TransactionController));
+router.get('/finances/property/:property_id', getPropertyFinances());
 
 /**
  * @swagger
@@ -1007,7 +1007,7 @@ router.get('/finances/property/:property_id', getPropertyFinances.bind(Transacti
  *                   description:
  *                     type: string
  */
-router.get('/categories', getCategories.bind(CategoryController));
+router.get('/categories', getCategories());
 
 /**
  * @swagger
@@ -1047,7 +1047,7 @@ router.get('/categories', getCategories.bind(CategoryController));
  *                     description:
  *                       type: string
  */
-router.post('/categories', createCategory.bind(CategoryController));
+router.post('/categories', createCategory());
 
 export function setRoutes(app) {
   app.use('/api', router);
