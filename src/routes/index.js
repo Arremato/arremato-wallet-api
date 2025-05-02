@@ -6,7 +6,7 @@ import { login } from '../controllers/authController.js'
 import { getProperties, getUserProperties, createProperty } from '../controllers/propertiesController.js'
 import { createTask, updateTaskStatus, getTasks, deleteTask, getPropertyTasks, updateTask } from '../controllers/tasksController.js'
 import { createTransaction, getFinancialSummary, getTransactions, createInstallmentFinance, getUserFinances, getPropertyFinances, createFinance, updateFinance, deleteFinance } from '../controllers/transactionsController.js'
-import {getCategories, createCategory} from '../controllers/categoryController.js';
+import { getCategories, createCategory } from '../controllers/categoryController.js';
 
 const router = express.Router();
 const indexController = new IndexController();
