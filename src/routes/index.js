@@ -7,6 +7,7 @@ import PropertiesController from '../controllers/propertiesController.js'
 import TasksController from '../controllers/tasksController.js'
 import TransactionController from '../controllers/transactionsController.js'
 import CategoryController from '../controllers/categoryController.js';
+import PropertyConstructionsController from '../controllers/propertyConstructionsController.js';
 
 const router = express.Router();
 const indexController = new IndexController();
@@ -16,6 +17,7 @@ const propertiesController = new PropertiesController();
 const tasksController = new TasksController();
 const transactionController = new TransactionController();
 const categoryController = new CategoryController();
+const propertyConstructionsController = new PropertyConstructionsController();
 
 router.use((req, res, next) => {
   const openRoutes = [
@@ -1054,6 +1056,207 @@ router.get('/categories', categoryController.getCategories.bind(categoryControll
  *                       type: string
  */
 router.post('/categories', categoryController.createCategory.bind(categoryController));
+
+/**
+ * @swagger
+ * /constructions:
+ *   post:
+ *     summary: Cria uma nova construção
+ *     security:
+ *       - BearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               property_id:
+ *                 type: string
+ *                 description: ID do imóvel relacionado
+ *               budget:
+ *                 type: number
+ *                 description: Orçamento da construção
+ *               spent:
+ *                 type: number
+ *                 description: Valor gasto na construção
+ *               delivery_days:
+ *                 type: integer
+ *                 description: Dias para entrega
+ *               responsible_name:
+ *                 type: string
+ *                 description: Nome do responsável
+ *               responsible_phone:
+ *                 type: string
+ *                 description: Telefone do responsável
+ *               status:
+ *                 type: string
+ *                 description: Status da construção
+ *     responses:
+ *       201:
+ *         description: Construção criada com sucesso.
+ */
+router.post('/constructions', propertyConstructionsController.createConstruction.bind(propertyConstructionsController));
+
+/**
+ * @swagger
+ * /constructions/{id}:
+ *   put:
+ *     summary: Atualiza uma construção existente
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID da construção
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               budget:
+ *                 type: number
+ *                 description: Orçamento da construção
+ *               spent:
+ *                 type: number
+ *                 description: Valor gasto na construção
+ *               delivery_days:
+ *                 type: integer
+ *                 description: Dias para entrega
+ *               responsible_name:
+ *                 type: string
+ *                 description: Nome do responsável
+ *               responsible_phone:
+ *                 type: string
+ *                 description: Telefone do responsável
+ *               status:
+ *                 type: string
+ *                 description: Status da construção
+ *     responses:
+ *       200:
+ *         description: Construção atualizada com sucesso.
+ */
+router.put('/constructions/:id', propertyConstructionsController.updateConstruction.bind(propertyConstructionsController));
+
+/**
+ * @swagger
+ * /constructions/{id}:
+ *   delete:
+ *     summary: Exclui uma construção existente
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID da construção
+ *     responses:
+ *       200:
+ *         description: Construção excluída com sucesso.
+ */
+router.delete('/constructions/:id', propertyConstructionsController.deleteConstruction.bind(propertyConstructionsController));
+
+/**
+ * @swagger
+ * /constructions:
+ *   get:
+ *     summary: Lista todas as construções relacionadas aos imóveis do usuário autenticado
+ *     security:
+ *       - BearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Lista de construções retornada com sucesso.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: string
+ *                   property_id:
+ *                     type: string
+ *                   budget:
+ *                     type: number
+ *                   spent:
+ *                     type: number
+ *                   delivery_days:
+ *                     type: integer
+ *                   responsible_name:
+ *                     type: string
+ *                   responsible_phone:
+ *                     type: string
+ *                   status:
+ *                     type: string
+ *                   created_at:
+ *                     type: string
+ *                     format: date-time
+ *                   updated_at:
+ *                     type: string
+ *                     format: date-time
+ */
+router.get('/constructions', propertyConstructionsController.getConstructions.bind(propertyConstructionsController));
+
+/**
+ * @swagger
+ * /constructions/property/{property_id}:
+ *   get:
+ *     summary: Lista todas as construções relacionadas a um imóvel específico
+ *     security:
+ *       - BearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: property_id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID do imóvel
+ *     responses:
+ *       200:
+ *         description: Lista de construções retornada com sucesso.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: string
+ *                   property_id:
+ *                     type: string
+ *                   budget:
+ *                     type: number
+ *                   spent:
+ *                     type: number
+ *                   delivery_days:
+ *                     type: integer
+ *                   responsible_name:
+ *                     type: string
+ *                   responsible_phone:
+ *                     type: string
+ *                   status:
+ *                     type: string
+ *                   created_at:
+ *                     type: string
+ *                     format: date-time
+ *                   updated_at:
+ *                     type: string
+ *                     format: date-time
+ *       403:
+ *         description: Permissão negada para acessar as construções do imóvel.
+ *       404:
+ *         description: Imóvel não encontrado.
+ */
+router.get('/constructions/property/:property_id', propertyConstructionsController.getConstructionsByProperty.bind(propertyConstructionsController));
 
 export function setRoutes(app) {
   app.use('/api', router);

@@ -5,7 +5,7 @@ const swaggerDefinition = {
   openapi: '3.0.0',
   info: {
     title: 'Arremato Wallet API',
-    version: '1.15.4',
+    version: '1.30.2',
     description: 'API para gerenciamento de propriedades.',
   },
   servers: [
